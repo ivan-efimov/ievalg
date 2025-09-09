@@ -1,0 +1,39 @@
+#  Copyright (c) 2025. Ivan Efimov <va1319@yandex.ru>
+#  BSD-3-Clause
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ievalg"
+version = "0.0.1"
+authors = [
+    { name = "Ivan Efimov", email = "va1319@yandex.ru" },
+]
+description = "Tiny CAS for personal use"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["CAS", "Field"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pytest",
+]
+license = "BSD-3-Clause"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/ivan-efimov/ievalg"
+Issues = "https://github.com/ivan-efimov/ievalg/issues"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = [
+    "tests",
+]
+pythonpath = [
+    "src"
+]
