@@ -25,6 +25,11 @@ class MAB:
         for l, r in self.__constraints.items():
             logging.info(f"Adding constraint: {l} = {r}")
         self.__permissions_zero = permissions_zero
+        m = ievalg.UT(rank=self.__rank, initializer=self.__gen_m)
+        l = ievalg.subconj(m)
+        for i, j, val in l:
+            if val == 0:
+                self.__permissions_zero.add(f"m{i}{j}")
         for p in self.__permissions_zero:
             logging.info(f"Adding permission: {p} == 0")
         self.__permissions_nonzero = permissions_nonzero
