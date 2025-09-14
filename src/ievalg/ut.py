@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 from ievalg import Field
 
@@ -46,6 +46,15 @@ class UT:
         self.__zero = Field(0, char=char)
         self.__unit = Field(1, char=char)
 
+    def rank(self) -> int:
+        return self.__rank
+
+    def char(self) -> int:
+        return self.__data[0].char()
+
+    def __iter__(self) -> Iterable[tuple[int, int, Field]]:
+        return iter([(i, j, self[i, j]) for i in range(2, self.__rank + 1) for j in range(1, i)])
+
     def __str__(self) -> str:
         max_widths: dict[int, int] = {}
         for col in range(1, self.__rank + 1):
@@ -75,6 +84,16 @@ class UT:
             return self.__unit
         return self.__data[self.__buf_index(row, col)]
 
+    def __setitem__(self, row_col: tuple[int, int], value: Field):
+        row = row_col[0]
+        col = row_col[1]
+        if row < 1 or row > self.__rank:
+            raise IndexError(f"row out of range, expected 1..{self.__rank}, got {row}")
+        if col < 1 or col >= row:
+            raise IndexError(f"col out of range, expected 1..{row - 1}, got {col}")
+
+        self.__data[self.__buf_index(row, col)] = value
+
     def __matmul__(self, other: UT) -> UT:
         char = self.__data[0].char()
         result = UT(self.__rank, [Field(0, char=char)] * self.__buf_len())
@@ -84,7 +103,7 @@ class UT:
                 val = self[row, col] + other[row, col]
                 for k in range(col + 1, row):
                     val = val + self[row, k] * other[k, col]
-                result.__data[result.__buf_index(row, col)] = val
+                result[row, col] = val
         return result
 
     def __buf_index(self, row: int, col: int) -> int:
