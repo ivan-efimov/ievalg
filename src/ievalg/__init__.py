@@ -2,5 +2,6 @@
 #  BSD-3-Clause
 
 from .field import Field
+from .mab import MAB
 from .prime_field import PrimeField
 from .ut import UT

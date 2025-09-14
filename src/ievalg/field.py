@@ -57,7 +57,7 @@ class Field(WithCharacteristic):
         if power < 0 and len(self.members()) > 1:
             raise ValueError("negative powers are currently not supported for multi-member Field")
         new_f: Field = Field(0, char=self.char())
-        for factors, coef in self.members():
+        for factors, coef in self.members().items():
             new_factors = HDict({})
             for f in factors.keys():
                 new_factors[f] = factors[f] * power
@@ -66,7 +66,7 @@ class Field(WithCharacteristic):
 
     def __neg__(self) -> Field:
         new_f: Field = Field(0, char=self.char())
-        for factors, coef in self.members():
+        for factors, coef in self.members().items():
             new_f.__members[factors] = -coef
         return new_f
 
@@ -92,6 +92,9 @@ class Field(WithCharacteristic):
                                                                    PrimeField(0, char=self.char())) + coef * self_coef
         new_f.__remove_trivial_members()
         return new_f
+
+    def __hash__(self) -> int:
+        return hash(f"{self}")
 
     def __accept_operand(self, op: Field | ConvertibleToField) -> Field:
         if isinstance(op, ConvertibleToField):
