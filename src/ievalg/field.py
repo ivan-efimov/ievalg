@@ -72,9 +72,9 @@ class Field(WithCharacteristic):
 
     def __add__(self, other: Field | ConvertibleToField) -> Field:
         new_f: Field = Field(0, char=self.char())
-        new_f.__members = {}
-        for factors, coef in self.__accept_operand(other).members():
-            new_f.__members[factors] = self.__members.get(factors, 0) + coef
+        new_f.__members = self.__members.copy()
+        for factors, coef in self.__accept_operand(other).members().items():
+            new_f.__members[factors] = self.__members.get(factors, PrimeField(0, char=self.char())) + coef
         new_f.__remove_trivial_members()
         return new_f
 
@@ -84,11 +84,12 @@ class Field(WithCharacteristic):
     def __mul__(self, other: Field | ConvertibleToField) -> Field:
         new_f: Field = Field(0, char=self.char())
         new_f.__members = {}
-        for factors, coef in self.__accept_operand(other).members():
-            for self_factors, self_coef in self.members():
+        for factors, coef in self.__accept_operand(other).members().items():
+            for self_factors, self_coef in self.members().items():
                 new_factors = HDict(
                     {key: factors.get(key, 0) + self_factors.get(key, 0) for key in (factors | self_factors)})
-                new_f.__members[new_factors] = new_f.__members.get(new_factors) + coef * self_coef
+                new_f.__members[new_factors] = new_f.__members.get(new_factors,
+                                                                   PrimeField(0, char=self.char())) + coef * self_coef
         new_f.__remove_trivial_members()
         return new_f
 

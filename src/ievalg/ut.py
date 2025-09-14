@@ -1,5 +1,8 @@
 #  Copyright (c) 2025. Ivan Efimov <va1319@yandex.ru>
 #  BSD-3-Clause
+
+from __future__ import annotations
+
 from collections.abc import Callable
 
 from ievalg import Field
@@ -54,7 +57,7 @@ class UT:
             s += ' '.join(
                 [f'{self[row, col]:^{max_widths[col]}}' for col in range(1, row)] +
                 [f'{self.__unit:^{max_widths[row]}}'] +
-                [f'{self.__zero:^{max_widths[col]}}' for col in range(row + 1, self.__rank)]
+                [f'{self.__zero:^{max_widths[col]}}' for col in range(row + 1, self.__rank + 1)]
             ) + "\n"
         return s
 
@@ -71,6 +74,18 @@ class UT:
         if col == row:
             return self.__unit
         return self.__data[self.__buf_index(row, col)]
+
+    def __matmul__(self, other: UT) -> UT:
+        char = self.__data[0].char()
+        result = UT(self.__rank, [Field(0, char=char)] * self.__buf_len())
+        for row in range(2, self.__rank + 1):
+            for col in range(1, row):
+                # c51 = a51 + a52*b21 + a53*b31 + a54*b41 + b51
+                val = self[row, col] + other[row, col]
+                for k in range(col + 1, row):
+                    val = val + self[row, k] * other[k, col]
+                result.__data[result.__buf_index(row, col)] = val
+        return result
 
     def __buf_index(self, row: int, col: int) -> int:
         if row < 2 or row > self.__rank:
