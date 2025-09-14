@@ -4,4 +4,5 @@
 from .field import Field
 from .mab import MAB
 from .prime_field import PrimeField
+from .subconj import subconj
 from .ut import UT
