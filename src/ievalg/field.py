@@ -40,10 +40,13 @@ class Field(WithCharacteristic):
     def __str__(self) -> str:
         if len(self.members()) == 0:
             return "0"
-        members = [(Field.__factors_to_str(k), v) for k, v in self.members()]
+        members = [(Field.__factors_to_str(k), v) for k, v in self.members().items()]
         members.sort(key=lambda x: x[0])
         # for members
-        return "+".join([f"{Field.__coef_to_str(coef)}{factors}" for factors, coef in members])
+        return "+".join([f"{Field.__coef_to_str(coef, len(factors) == 0)}{factors}" for factors, coef in members])
+
+    def __format__(self, format_spec):
+        return f"{str(self):{format_spec}}"
 
     def __eq__(self, other: Field | ConvertibleToField) -> bool:
         return self.members() == self.__accept_operand(other).members()
@@ -104,8 +107,11 @@ class Field(WithCharacteristic):
             self.members()[factors] = self.members().get(factors, PrimeField(0, char=self.char())) + coef
 
     def __parse_monomial(self, value: str) -> tuple[Factors, PrimeField]:
+        if value == "":
+            return HDict({}), PrimeField(0, char=self.char())
+
         factors: Factors = HDict({})
-        coef: PrimeField = PrimeField(0, char=self.char())
+        coef: PrimeField = PrimeField(1, char=self.char())
 
         for factor_str in [v.strip() for v in value.split(sep="*")]:
             if "^" in factor_str:
@@ -113,8 +119,10 @@ class Field(WithCharacteristic):
                 symbol = symbol.strip()
                 exp = int(exp.strip())
             else:
-                symbol, exp = factor_str.strip(), 0
-            if exp != 0:
+                symbol, exp = factor_str.strip(), 1
+            if symbol.isnumeric():
+                coef = coef * PrimeField(int(symbol), char=self.char())
+            elif exp != 0:
                 factors[symbol] = factors.get(symbol, 0) + exp
 
         return factors, coef
@@ -135,7 +143,9 @@ class Field(WithCharacteristic):
         return ""
 
     @staticmethod
-    def __coef_to_str(coef: PrimeField) -> str:
+    def __coef_to_str(coef: PrimeField, trivial_factors: bool) -> str:
+        if trivial_factors:
+            return f"{coef}"
         if coef != 1:
             return f"{coef}*"
         return ""

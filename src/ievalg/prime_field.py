@@ -23,6 +23,9 @@ class PrimeField(WithCharacteristic):
     def __str__(self) -> str:
         return f"{self.value()}"
 
+    def __format__(self, format_spec):
+        return f"{str(self):{format_spec}}"
+
     def __eq__(self, other: PrimeField | ConvertibleToPrimeField) -> bool:
         return self.value() == self.__accept_operand(other).value()
 

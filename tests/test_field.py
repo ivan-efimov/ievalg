@@ -10,4 +10,6 @@ def test_basics():
     assert f"{Field(0, char=2)}" == "0"
     assert Field(0, char=2) == 0
     assert Field(1, char=2) == 1
-    assert Field('c^3+a^2+b', char=2) == "a^2+b+c^3"
+    assert f"{Field('c^3+a^2+b', char=2)}" == "a^2+b+c^3"
+    assert f"{Field('a', char=2)}" == "a"
+    assert f"{Field('1*2*3+a^2', char=11)}" == "6+a^2"
