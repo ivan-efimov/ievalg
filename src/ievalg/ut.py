@@ -31,6 +31,7 @@ class UT:
                 raise ValueError(f"inconsistent characteristics in initializer generator")
             self.__data = initializer
         else:
+            self.__data = []
             for row in range(2, self.__rank + 1):
                 for col in range(1, row):
                     new_element = initializer(row, col)
@@ -45,24 +46,37 @@ class UT:
     def __str__(self) -> str:
         max_widths: dict[int, int] = {}
         for col in range(1, self.__rank + 1):
-            max_widths[col] = max(
-                [len(f"{self.__data[self.__buf_index(row, col)]}") for row in range(col + 1, self.__rank + 1)])
-        max_widths[self.__rank] = max(len(f"{self.__zero}"), len(f"{self.__unit}"))
-        s: str = ""
+            max_widths[col] = 1
+            for row in range(col + 1, self.__rank + 1):
+                max_widths[col] = max([max_widths[col], len(f"{self[row, col]}")])
+        s: str = "\n"
         for row in range(1, self.__rank + 1):
-            values_s: list[str] = []
-            for col in range(1, row):
-                values_s.append(f"{self.__data[self.__buf_index(row, col)]:{max_widths[col]}}")
-            values_s.append(f"{self.__unit}")
-            values_s.append(f"{self.__zero}")
+            s += ' '.join(
+                [f'{self[row, col]:^{max_widths[col]}}' for col in range(1, row)] +
+                [f'{self.__unit:^{max_widths[row]}}'] +
+                [f'{self.__zero:^{max_widths[col]}}' for col in range(row + 1, self.__rank)]
+            ) + "\n"
+        return s
 
+    def __getitem__(self, row_col: tuple[int, int]) -> Field:
+        row = row_col[0]
+        col = row_col[1]
+        if row < 1 or row > self.__rank:
+            raise IndexError(f"row out of range, expected 1..{self.__rank}, got {row}")
+        if col < 1 or col > self.__rank:
+            raise IndexError(f"col out of range, expected 1..{self.__rank}, got {col}")
 
+        if col > row:
+            return self.__zero
+        if col == row:
+            return self.__unit
+        return self.__data[self.__buf_index(row, col)]
 
     def __buf_index(self, row: int, col: int) -> int:
         if row < 2 or row > self.__rank:
             raise IndexError(f"row out of range, expected 2..{self.__rank}, got {row}")
-        if col < 1 or row <= row:
-            raise IndexError(f"col out of range, expected 1..{row - 1}, got {row}")
+        if col < 1 or col >= row:
+            raise IndexError(f"col out of range, expected 1..{row - 1}, got {col}")
         return self.__buf_len(row - 1) + col - 1
 
     def __buf_len(self, rows: int | None = None) -> int:
