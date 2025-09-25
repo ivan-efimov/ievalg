@@ -15,7 +15,7 @@ class HDict(dict):
 Exp = int
 Factors = HDict[str, Exp]
 
-ConvertibleToField = str | PrimeField | int
+ConvertibleToField = str | PrimeField | int | HDict
 
 FieldMembers = dict[Factors, PrimeField]
 
@@ -30,6 +30,8 @@ class Field(WithCharacteristic):
             if isinstance(value, int):
                 value = PrimeField(value, char=self.char())
             self.__members[HDict({})] = value
+        elif isinstance(value, HDict):
+            self.__members[value] = PrimeField(1, char=char)
         else:
             self.__build_from_str(value)
         self.__remove_trivial_members()
@@ -88,6 +90,9 @@ class Field(WithCharacteristic):
             for self_factors, self_coef in self.members().items():
                 new_factors = HDict(
                     {key: factors.get(key, 0) + self_factors.get(key, 0) for key in (factors | self_factors)})
+                for f, exp in list(new_factors.items()):
+                    if exp == 0:
+                        del new_factors[f]
                 new_f.__members[new_factors] = new_f.__members.get(new_factors,
                                                                    PrimeField(0, char=self.char())) + coef * self_coef
         new_f.__remove_trivial_members()

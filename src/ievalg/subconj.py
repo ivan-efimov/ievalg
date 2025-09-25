@@ -3,15 +3,14 @@
 from copy import deepcopy
 
 import ievalg
-from ievalg import UT
 
 
-def subconj(m: UT) -> UT:
+def subconj(m: ievalg.UT) -> ievalg.UT:
     subsets: list[set[int]] = []
 
     sc = deepcopy(m)
 
-    zero = ievalg.Field(0, char=m.char())
+    zero = ievalg.UT.Field(0)
 
     in_subset: bool = False
     for i in range(2, m.rank() + 1):
